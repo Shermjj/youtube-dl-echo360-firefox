@@ -11,7 +11,6 @@ which we read from the message.
 */
 function notify(message) {
   console.log('background script received message');
-  console.log(message)
   browser.notifications.create({
     'type': 'basic',
     //'iconUrl': browser.extension.getURL('icons/message.svg'),
