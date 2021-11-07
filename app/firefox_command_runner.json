@@ -1,7 +1,7 @@
 {
   "name": "firefox_command_runner",
   "description": "Run native linux commands from firefox",
-  "path": "/Users/mumu/docs/coding/youtube-dl-firefox-addon/app/firefox-command-runner.py",
+  "path": "/Users/mumu/docs/coding/youtube-dl-echo360-firefox/app/firefox-command-runner.py",
   "type": "stdio",
   "allowed_extensions": [ "firefox-command-runner@example.org" ]
 }

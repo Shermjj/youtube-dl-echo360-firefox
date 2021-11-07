@@ -24,6 +24,8 @@
   },
 
   "permissions": [
+     "webRequest",
+     "webNavigation",
     "nativeMessaging",
     "notifications",
     "activeTab",

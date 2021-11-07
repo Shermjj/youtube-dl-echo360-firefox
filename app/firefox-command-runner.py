@@ -32,7 +32,6 @@ WAIT_PERIOD = 1 # select() timeout, seconds
 # [ https://docs.python.org/3/library/signal.html#signal.signal ]
 S.signal(S.SIGPIPE, lambda signum, stfr: None)
 
-
 # -------------------------------------------------------------------------
 # logging ( nb: better use syslog for this )
 
@@ -122,49 +121,8 @@ tasks = {} # { pid: (my_jar, url) }
 
 while True:
     try:
-        # encodedMessage = getMessage()
-        # receivedMessage = json.loads(encodedMessage)
-        # url = receivedMessage['url']
-        # use_cookies = bool('cookies' in receivedMessage and receivedMessage['cookies'])
-        # try:
-        #     command_vec = ['/opt/homebrew/bin/youtube-dl']
-        #     config_path = os.path.join(os.pardir, 'config')
-        #     if os.path.isfile(config_path):
-        #         pass
-        #         #command_vec += ['--config-location', config_path]
-
-        #     if use_cookies:
-        #         my_jar = makeCookieJar(receivedMessage['cookies'])
-        #         command_vec += ['--cookies', my_jar]
-
-        #     command_vec.append(url)
-        #     ## sendMessage(encodeMessage('starting ' + str(command_vec)))
-        #     ## subprocess.check_output(command_vec)
-        #     _log(str(command_vec))
-        #     subprocess.check_output(command_vec, cwd=DOWNLOADS)
-        #     #subprocess.check_output(['echo','1'])
-        #     _log("success")
-        #     # pid = os.fork()
-        #     # if 0 == pid :
-        #     #     _log("line 153")
-        #     #     subprocess.check_output(command_vec, cwd=DOWNLOADS)
-        #     #     _log("line 156")
-        #     #     break
-        #     # else:
-        #     #     tasks[ pid ] = ( my_jar, url)
-        #     #     _log("line 160")
-        #     #     _log("[%s]: %r", pid, url)
-        #     #     _log(tasks.keys())
-        
-        # # todo: review and most likely clear this internal try .. except block
-        # except Exception as err:
-        #     _log("error")
-        #     _log(str(err))
-        #     sendMessage(encodeMessage('Error Running: ' + str(command_vec) + ': ' + str(err)))
-
         r_, _, _ = select.select([sys.stdin], [], [], WAIT_PERIOD)
         if r_:
-        
             my_jar = None
             encodedMessage = getMessage()
             if not encodedMessage:
@@ -205,7 +163,6 @@ while True:
                     _log("line 160")
                     _log("[%s]: %r", pid, url)
                     _log(str(tasks.keys()))
-            
             # todo: review and most likely clear this internal try .. except block
             except Exception as err:
                 _log("error")
@@ -219,7 +176,6 @@ while True:
                 except OSError as e:
                     if e.errno == E.ECHILD:
                         break
-                        
                 if 0 == pid:
                     break
                 # else
@@ -234,8 +190,6 @@ while True:
                 else:
                     _log('[%s]: %r : Ok', pid, url)
                     sendMessage(encodeMessage('Finished downloading to %s : %r' % ( DOWNLOADS, url)))
-            
-            
     except Exception as err:
         ## _log('exc: %s', err)
         _log('exception: %s', tb.format_exc())
