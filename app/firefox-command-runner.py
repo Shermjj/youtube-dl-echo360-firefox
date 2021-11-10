@@ -18,8 +18,8 @@ import traceback as tb
 # settings
 
 # HOMEDIR = os.environ.get("HOME", '/tmp')
-HOMEDIR = "/Users/mumu"
-DOWNLOADS = "/Users/mumu"
+HOMEDIR = "/Users/frischke"
+DOWNLOADS = "/Users/frischke"
 # replace teh last '.' for 'Downloads' or whatever
 # DOWNLOADS = os.path.join( HOMEDIR, '.' )
 WAIT_PERIOD = 1 # select() timeout, seconds
@@ -135,20 +135,25 @@ while True:
 
             sendMessage(encodeMessage('Starting Download: ' + url))
             try:
-                command_vec = ['/opt/homebrew/bin/youtube-dl']
+                #command_vec = ['/opt/homebrew/bin/youtube-dl']
+                _log("here")
+                command_vec = ['/usr/local/bin/youtube-dl', '-o', '%(title)s.%(ext)s']
                 config_path = os.path.join(os.pardir, 'config')
                 if os.path.isfile(config_path):
                     pass
                     #command_vec += ['--config-location', config_path]
 
                 if use_cookies:
+                    _log("here2")
                     my_jar = makeCookieJar(receivedMessage['cookies'])
                     command_vec += ['--cookies', my_jar]
-
+                    _log("here3")
                 command_vec.append(url)
+                sendMessage(encodeMessage(str(command_vec)))
+                #_log(command_vec)
                 ## sendMessage(encodeMessage('starting ' + str(command_vec)))
                 ## subprocess.check_output(command_vec)
-                _log(str(command_vec))
+                #_log(str(command_vec))
                 #subprocess.check_output(command_vec, cwd=DOWNLOADS)
                 #subprocess.check_output(['echo','1'])
                 _log("success")

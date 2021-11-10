@@ -36,36 +36,41 @@ Assign `notify()` as a listener to messages from the content script.
 */
 port.onMessage.addListener(notify);
 
-
-function echo360download(requestDetails) {
-  //grabs the echo360 link and sends to download
+function logURL(requestDetails) {
   console.log("Loading: " + requestDetails.url);
 }
 
-function downloader(url){
-  console.log(browser.webRequest.onBeforeRequest.hasListener(logURL))
-  console.log('getting cookies for ' + tab.url);
-  browser.cookies.getAll({url: tab.url}, function(cookie_list) {
-    console.log('found ' + cookie_list.length + ' cookies');
-    console.log('Sending: ' + tab.url);
+function echo360download(requestDetails) {
+  /*
+  In the case of echo360, we need to grab the url by inspecting the http traffic
+  we setup this method as a listener to be attached and removed
+  Removal: remove on getting a download and if tab changes
+  */
 
+  //grabs the echo360 link and sends to download
+  console.log("Loading: " + requestDetails.url);
 
-    //port.postMessage(JSON.stringify({url: tab.url, cookies: cookie_list.map(formatCookie)}));
-  });
+  if(requestDetails.url.includes("https://content.echo360.org") 
+    && requestDetails.url.includes("av.m3u8")){
+    console.log("firing echo360 download")
+    browser.webRequest.onBeforeRequest.removeListener(echo360download);
+    downloader(requestDetails.url)
+  }
 }
 
-// browser.webRequest.onBeforeRequest.addListener(
-//   logURL,
-//   {urls: ["<all_urls>"]}
-// );
+function downloader(url){
+  /*
+  sends a JSON with the url and cookies
+  */
 
-function handleUpdated(tabId, changeInfo, tabInfo) {
-  if (changeInfo.url && browser.webRequest.onBeforeRequest.hasListener(logURL)) {
-    console.log("IM REMOOOOVIN");
-    browser.webRequest.onBeforeRequest.removeListener(logURL);
-    console.log("Tab: " + tabId +
-                " URL changed to " + changeInfo.url);
-  }
+  //console.log(browser.webRequest.onBeforeRequest.hasListener(logURL))
+  console.log('getting cookies for ' + url);
+  browser.cookies.getAll({url: url}, function(cookie_list) {
+    console.log('found ' + cookie_list.length + ' cookies');
+    console.log('Sending: ' + url);
+    console.log(JSON.stringify({url: url, cookies: cookie_list.map(formatCookie)}))
+    port.postMessage(JSON.stringify({url: url, cookies: cookie_list.map(formatCookie)}));
+  });
 }
 
 
@@ -73,18 +78,32 @@ function handleUpdated(tabId, changeInfo, tabInfo) {
 On a click on the browser action, send the app a message.
 */
 browser.browserAction.onClicked.addListener(function(tab) {
-  //todo: add support for echo360 and fix evenlistener issue
   if(tab.url.includes("https://echo360.org")) {
     browser.webRequest.onBeforeRequest.addListener(
-      logURL,
+      echo360download,
       {urls: ["<all_urls>"]}
     );
-
    browser.tabs.reload(); 
-   browser.tabs.onUpdated.addListener(handleUpdated);
   }
-
+  else{
+    downloader(tab.url)
+  }
 });
 
+// browser.webRequest.onBeforeRequest.addListener(
+//   logURL,
+//   {urls: ["<all_urls>"]}
+// );
 
+// function handleUpdated(tabId, changeInfo, tabInfo) {
+//   console.log("Tab: " + tabId +
+//             " URL changed to " + tabInfo);
 
+//   if (changeInfo.url && browser.webRequest.onBeforeRequest.hasListener(echo360download)) {
+//     console.log("IM REMOOOOVIN");
+//     browser.webRequest.onBeforeRequest.removeListener(echo360download);
+//     console.log("Tab: " + tabId +
+//                 " URL changed to " + changeInfo.url + tabInfo);
+//   }
+// }
+// browser.tabs.onUpdated.addListener(handleUpdated);
