@@ -17,20 +17,13 @@ import traceback as tb
 # -------------------------------------------------------------------------
 # settings
 
-# HOMEDIR = os.environ.get("HOME", '/tmp')
-HOMEDIR = "/Users/frischke"
-DOWNLOADS = "/Users/frischke"
 # replace teh last '.' for 'Downloads' or whatever
-# DOWNLOADS = os.path.join( HOMEDIR, '.' )
+HOMEDIR = os.path.expanduser('~') 
+DOWNLOADS = os.path.join( HOMEDIR, '.' )
+YOUTUBEDLPATH = "/opt/homebrew/bin/youtube-dl"
 WAIT_PERIOD = 1 # select() timeout, seconds
 
 
-# -------------------------------------------------------------------------
-# fixes
-
-# [ https://bugs.python.org/issue1652 ]
-# [ https://docs.python.org/3/library/signal.html#signal.signal ]
-S.signal(S.SIGPIPE, lambda signum, stfr: None)
 
 # -------------------------------------------------------------------------
 # logging ( nb: better use syslog for this )
@@ -70,34 +63,6 @@ def sendMessage(encodedMessage):
     sys.stdout.buffer.write(encodedMessage['content'])
     sys.stdout.buffer.flush()
 
-
-# Read a message from stdin and decode it.
-# def getMessage():
-#     rawLength = sys.stdin.read(4)
-#     if len(rawLength) == 0:
-#         ## sys.exit(0)
-#         return None
-#     messageLength = struct.unpack('@I', rawLength)[0]
-#     raw_message = sys.stdin.read(messageLength)
-#     ## _log("| %r", raw_message)
-#     message = raw_message.decode('string_escape').strip("'\"")
-#     return message
-
-
-# # Encode a message for transmission,
-# # given its content.
-# def encodeMessage(messageContent):
-#     encodedContent = json.dumps(messageContent)
-#     encodedLength = struct.pack('@I', len(encodedContent))
-#     return {'length': encodedLength, 'content': encodedContent}
-
-
-# # Send an encoded message to stdout
-# def sendMessage(encodedMessage):
-#     sys.stdout.write(encodedMessage['length'])
-#     sys.stdout.write(encodedMessage['content'])
-#     sys.stdout.flush()
-
 # -------------------------------------------------------------------------
 # cookie handling code
 
@@ -127,50 +92,37 @@ while True:
             encodedMessage = getMessage()
             if not encodedMessage:
                 continue
-            # else ..
             receivedMessage = json.loads(encodedMessage) # if this fails, we try it again
-            #receivedMessage = {'url':"--help", 'cookies':['bla']}
             url = receivedMessage['url']
             use_cookies = bool('cookies' in receivedMessage and receivedMessage['cookies'])
 
             sendMessage(encodeMessage('Starting Download: ' + url))
             try:
-                #command_vec = ['/opt/homebrew/bin/youtube-dl']
-                _log("here")
-                command_vec = ['/usr/local/bin/youtube-dl', '-o', '%(title)s.%(ext)s']
-                config_path = os.path.join(os.pardir, 'config')
+                command_vec = [YOUTUBEDLPATH]
+                config_path = os.path.abspath(os.path.join(os.pardir, 'config'))
+
                 if os.path.isfile(config_path):
-                    pass
-                    #command_vec += ['--config-location', config_path]
+                    command_vec += ['--config-location', config_path]
 
                 if use_cookies:
-                    _log("here2")
                     my_jar = makeCookieJar(receivedMessage['cookies'])
                     command_vec += ['--cookies', my_jar]
-                    _log("here3")
+
                 command_vec.append(url)
                 sendMessage(encodeMessage(str(command_vec)))
-                #_log(command_vec)
-                ## sendMessage(encodeMessage('starting ' + str(command_vec)))
-                ## subprocess.check_output(command_vec)
-                #_log(str(command_vec))
-                #subprocess.check_output(command_vec, cwd=DOWNLOADS)
-                #subprocess.check_output(['echo','1'])
-                _log("success")
                 pid = os.fork()
                 if 0 == pid :
-                    _log("line 153")
-                    subprocess.check_output(command_vec, cwd=DOWNLOADS)
-                    _log("line 156")
+                    try:
+                        subprocess.check_output(command_vec, cwd=DOWNLOADS, stderr=subprocess.STDOUT)
+                    except subprocess.CalledProcessError as cpe:
+                        _log(str(cpe.output))
                     break
                 else:
                     tasks[ pid ] = ( my_jar, url)
-                    _log("line 160")
                     _log("[%s]: %r", pid, url)
                     _log(str(tasks.keys()))
             # todo: review and most likely clear this internal try .. except block
             except Exception as err:
-                _log("error")
                 _log(str(err))
                 sendMessage(encodeMessage('Error Running: ' + str(command_vec) + ': ' + str(err)))
 

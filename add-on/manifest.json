@@ -10,7 +10,7 @@
 
   "applications": {
     "gecko": {
-      "id": "firefox-command-runner@example.org",
+      "id": "firefox-command-runner-echo360@example.org",
       "strict_min_version": "57.0"
     }
   },

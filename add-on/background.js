@@ -36,20 +36,11 @@ Assign `notify()` as a listener to messages from the content script.
 */
 port.onMessage.addListener(notify);
 
-function logURL(requestDetails) {
-  console.log("Loading: " + requestDetails.url);
-}
-
+/*
+echo360 listener
+In the case of echo360, we need to grab the url by inspecting the http traffic
+*/
 function echo360download(requestDetails) {
-  /*
-  In the case of echo360, we need to grab the url by inspecting the http traffic
-  we setup this method as a listener to be attached and removed
-  Removal: remove on getting a download and if tab changes
-  */
-
-  //grabs the echo360 link and sends to download
-  console.log("Loading: " + requestDetails.url);
-
   if(requestDetails.url.includes("https://content.echo360.org") 
     && requestDetails.url.includes("av.m3u8")){
     console.log("firing echo360 download")
@@ -58,12 +49,10 @@ function echo360download(requestDetails) {
   }
 }
 
+/*
+Main download function
+*/
 function downloader(url){
-  /*
-  sends a JSON with the url and cookies
-  */
-
-  //console.log(browser.webRequest.onBeforeRequest.hasListener(logURL))
   console.log('getting cookies for ' + url);
   browser.cookies.getAll({url: url}, function(cookie_list) {
     console.log('found ' + cookie_list.length + ' cookies');
@@ -90,20 +79,13 @@ browser.browserAction.onClicked.addListener(function(tab) {
   }
 });
 
-// browser.webRequest.onBeforeRequest.addListener(
-//   logURL,
-//   {urls: ["<all_urls>"]}
-// );
-
-// function handleUpdated(tabId, changeInfo, tabInfo) {
-//   console.log("Tab: " + tabId +
-//             " URL changed to " + tabInfo);
-
-//   if (changeInfo.url && browser.webRequest.onBeforeRequest.hasListener(echo360download)) {
-//     console.log("IM REMOOOOVIN");
-//     browser.webRequest.onBeforeRequest.removeListener(echo360download);
-//     console.log("Tab: " + tabId +
-//                 " URL changed to " + changeInfo.url + tabInfo);
-//   }
-// }
-// browser.tabs.onUpdated.addListener(handleUpdated);
+/*
+Fallback listener to remove the echo360download listener upon page load complete
+In case where we do not find a suitable url to download
+*/
+browser.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
+    if (browser.webRequest.onBeforeRequest.hasListener(echo360download) && tab.status == "complete" && tab.active) { 
+      console.log("removing listener in fallback")
+      browser.webRequest.onBeforeRequest.removeListener(echo360download);
+    }
+});

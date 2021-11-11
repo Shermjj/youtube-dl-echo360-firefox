@@ -1,22 +1,26 @@
 # Lines starting with # are comments
 
 # Always extract audio
--x
+#-x
 
 # Do not copy the mtime
---no-mtime
+#--no-mtime
 
 # Best Audio Quality
---audio-quality 0
+#--audio-quality 0
 
 # Audio format
---audio-format mp3
+#--audio-format mp3
 
 # Dont download full playlist, just video
---no-playlist
+#--no-playlist
 
 # Embed thumbnail as cover art
---embed-thumbnail
+#--embed-thumbnail
 
 # Save all videos under Movies directory in your home directory
--o ~/Music/Downloads/%(title)s.%(ext)s
+#-o ~/Music/Downloads/%(title)s.%(ext)s
+
+-o %(title)s.%(ext)s
+
+--ffmpeg-location /opt/homebrew/bin/ffmpeg
