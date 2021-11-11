@@ -3,7 +3,6 @@
 ![bernie](meme.jpg)
 
  - Forked from [here](https://github.com/akhilkedia/youtube-dl-firefox-addon)
- - Firefox addon to download youtube videos using [youtube-dl](https://github.com/rg3/youtube-dl)
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-green.svg)](http://www.gnu.org/licenses/gpl-3.0) 
 
@@ -14,11 +13,11 @@
  * [How to install Youtube Dl Firefox Addon](#how-to-install-youtube-dl-firefox-addon)
  * [How to use this addon](#how-to-use-this-addon)
 
-## What Youtube Dl Firefox Addon does
+## What Youtube-DL Firefox Addon does
 
-This is a firefox addon to which downloads youtube videos using [youtube-dl](https://github.com/rg3/youtube-dl).
+This is a firefox addon to which downloads youtube videos/any videos supported by youtube-dl using [youtube-dl](https://github.com/rg3/youtube-dl).
 
-Now with echo360 support.
+Now with echo360 support. 
 
 You can configure youtube-dl to download only audio, or convert into any desired format after installing, or even download full youtube playlists. These options are controlled via youtube-dl's own [configuration](https://github.com/ytdl-org/youtube-dl#configuration)
 
@@ -41,3 +40,8 @@ You can configure youtube-dl to download only audio, or convert into any desired
 1. Press the addon's logo in the toolbar once. (The logo looks like a YouTube icon).
 1. The video will be downloaded automatically in the background.
 1. After the download is finished, you will get a notification saying the download has finished. For the download locations, format, etc, please see youtube-dl's own [configuration](https://github.com/ytdl-org/youtube-dl#configuration)
+
+## TODO
+
+1. Add titles for filenames for echo360
+2. Add support for echo360 playlist
